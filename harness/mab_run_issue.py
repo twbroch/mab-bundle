@@ -71,6 +71,28 @@ def toc_pass(client, pdf, scan_lo=1, scan_hi=9):
         e["end_page"]=(ents[i+1]["start_page"]-1) if i+1<len(ents) else None
     return ents, offset, toc.get("notes",""), msg.usage
 
+# ---------- offset anchor (robust; folio calibration is unreliable) ----------
+ANCHOR_TOOL={"name":"emit_anchor","description":"Identify which image is the FIRST page of a named article.",
+  "input_schema":{"type":"object","properties":{
+    "image_index":{"type":"integer","description":"1-based index (in given order) of the image that is the FIRST page where this article begins (its headline appears). 0 if none."},
+    "confidence":{"type":"number"}},"required":["image_index"]}}
+
+def anchor_offset(client, pdf, entries, win=10):
+    """One vision call: find a distinctive feature's first page in a window -> true offset (=k-1)."""
+    feats=[e for e in entries if e.get("kind")=="feature" and e.get("start_page",0)>3 and len(e.get("title",""))>=10]
+    cand=(sorted(feats,key=lambda e:-len(e["title"]))[:1] or sorted(entries,key=lambda e:-len(e.get("title","")))[:1])
+    if not cand: return None,None
+    e=cand[0]; sp=int(e["start_page"])
+    with tempfile.TemporaryDirectory() as td:
+        imgs=render(pdf,sp,sp+win-1,td,"anc")
+        content=[{"type":"image","source":{"type":"base64","media_type":"image/png","data":b64(p)}} for p in imgs]
+        content.append({"type":"text","text":f"These are consecutive scanned magazine pages. Which image (1-based) is the FIRST page of the article titled \"{e['title']}\""+(f" by {e['author']}" if e.get('author') else "")+"? Use emit_anchor (0 if absent)."})
+        msg=client.messages.create(model=MODEL,max_tokens=300,system="You locate where a specific magazine article begins among scanned page images.",
+            tools=[ANCHOR_TOOL],tool_choice={"type":"tool","name":"emit_anchor"},messages=[{"role":"user","content":content}])
+        a=next(b.input for b in msg.content if b.type=="tool_use")
+    k=int(a.get("image_index",0) or 0)
+    return ((k-1) if k>=1 else None), e["title"]
+
 # ---------- matching ----------
 def norm(s): return re.sub(r"\s+"," ",re.sub(r"[^a-z0-9 ]"," ",(s or "").lower())).strip()
 def toks(s): return set(norm(s).split())
@@ -179,11 +201,11 @@ def extract_article(client,pdf,plo,phi):
         return merged, usage_in, usage_out
 
 # ---------- QC gate ----------
-ART_LINE=re.compile(r"<p>\s*(?:this (?:is|page)[^<]*advertisement[^<]*|these pages contain only advertisement[^<]*|"
-                    r"this page (?:is|contains)[^<]*advertisement[^<]*)\s*</p>", re.I)
+ART_LINE=re.compile(r"<p\b[^>]*>(?:(?!</p>).)*?(?:this (?:is|page)[^<]{0,80}advertisement|these pages contain only advertisement|subscribe (?:today|now)|newsstand price|use (?:the )?form below|payable to[^<]{0,40}marathon)(?:(?!</p>).)*?</p>", re.I|re.S)
 def qc_clean(art, pid, outdir, pdf, plo):
     b=art.get("body_html","") or ""
     b=ART_LINE.sub("", b)                       # strip ad-artifact paragraphs anywhere
+    b=re.split(r"<h[23][^>]*>\s*The Rest of the Pack\s*</h[23]>", b, 1, re.I)[0]  # cut recurring race-index appendix + trailing sub-ad
     body_norm=norm(re.sub(r"<[^>]+>"," ",b))
     figs_in=art.get("figures",[]) or []
     # decide keep/drop; origN is the 1-based index that matches [[FIGURE:origN]] in the body
@@ -225,9 +247,11 @@ def main():
     Path(args.stage).mkdir(parents=True,exist_ok=True)
     client=anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     slo,shi=(int(x) for x in args.toc_scan.split("-"))
-    ents,offset,tnotes,tu=toc_pass(client,args.pdf,slo,shi)
+    ents,folio_off,tnotes,tu=toc_pass(client,args.pdf,slo,shi)
+    anc_off,anc_title=anchor_offset(client,args.pdf,ents)   # robust; folio is a fallback
+    offset = anc_off if anc_off is not None else folio_off
     if args.offset is not None: offset=args.offset
-    log(f"TOC: {len(ents)} entries, offset={offset}")
+    log(f"TOC: {len(ents)} entries | offset anchor={anc_off} (via '{(anc_title or '')[:30]}') folio={folio_off} -> using {offset}")
     matches,un_posts,un_ents=match_posts(posts,ents)
     report={"pdf":os.path.basename(args.pdf),"offset":offset,"toc_entries":ents,"toc_notes":tnotes,
             "matched":[],"unmatched_posts":un_posts,"missing_articles":[{"title":e["title"],"author":e.get("author",""),
@@ -248,8 +272,15 @@ def main():
         except ContentFiltered as cf:
             log(f"   SKIP content-filter: {cf}"); report["skipped"].append({"id":pid,"title":e["title"],"reason":"content-filter"}); continue
         report["tokens_in"]+=ti; report["tokens_out"]+=to
+        # title-verify gate: reject misaligned extractions (wrong offset -> ads/neighbour article)
+        got=art.get("title","") or ""
+        vsim=title_sim(got, e["title"])
+        if vsim < 0.5:
+            log(f"   REJECT misaligned: got '{got[:40]}' vs expected '{e['title'][:40]}' (sim {vsim:.2f})")
+            report.setdefault("misaligned",[]).append({"id":pid,"expected":e["title"],"got":got,"sim":round(vsim,3),"range":f"{lo}-{hi}"})
+            continue
         body,figs,dropped=qc_clean(art,pid,args.stage,args.pdf,plo)
-        rec={"id":pid,"old_title":m["post"]["title"],"title":art.get("title",""),"subtitle":art.get("subtitle",""),
+        rec={"id":pid,"old_title":m["post"]["title"],"title":got,"subtitle":art.get("subtitle",""),
              "author":art.get("author",""),"body_html":body,"figures":figs,"notes":art.get("notes","")}
         Path(args.stage+f"/{pid}.json").write_text(json.dumps(rec,ensure_ascii=False))
         report["matched"].append({"id":pid,"new_title":rec["title"],"range":f"{lo}-{hi}","score":m["score"],

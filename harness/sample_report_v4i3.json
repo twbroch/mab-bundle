@@ -1,0 +1,217 @@
+{
+ "pdf": "2000 Vol 4 Issue 3 -Marathon & Beyond.pdf",
+ "offset": 6,
+ "toc_entries": [
+  {
+   "title": "Editorial: IQ Aerobics",
+   "author": "Richard Benyo",
+   "kind": "editorial",
+   "start_page": 5,
+   "end_page": 7
+  },
+  {
+   "title": "On the Road with Scott Douglas",
+   "author": "Scott Douglas",
+   "kind": "column",
+   "start_page": 8,
+   "end_page": 13
+  },
+  {
+   "title": "The Man of Steele Defies Science",
+   "author": "Mike Tymn",
+   "kind": "feature",
+   "start_page": 14,
+   "end_page": 26
+  },
+  {
+   "title": "Marathon Training: More From Less",
+   "author": "Guy Avery",
+   "kind": "feature",
+   "start_page": 27,
+   "end_page": 42
+  },
+  {
+   "title": "The Day of the Amby",
+   "author": "Johnny J. Kelley",
+   "kind": "feature",
+   "start_page": 43,
+   "end_page": 50
+  },
+  {
+   "title": "Blow Up, Break Down",
+   "author": "Stephanie Ehret",
+   "kind": "feature",
+   "start_page": 51,
+   "end_page": 65
+  },
+  {
+   "title": "Track Time",
+   "author": "Dave Kromer",
+   "kind": "feature",
+   "start_page": 66,
+   "end_page": 71
+  },
+  {
+   "title": "A Run Between Two Oceans",
+   "author": "Michael Brandt",
+   "kind": "feature",
+   "start_page": 72,
+   "end_page": 82
+  },
+  {
+   "title": "My Most Unforgettable Ultramarathon (And What I Learned From It): Hardrock 1999",
+   "author": "Rich Limacher",
+   "kind": "department",
+   "start_page": 83,
+   "end_page": 97
+  },
+  {
+   "title": "Wobble to Death (Special Book Bonus: Part III)",
+   "author": "Peter Lovesey",
+   "kind": "fiction",
+   "start_page": 98,
+   "end_page": 117
+  },
+  {
+   "title": "Quad Cities Marathon",
+   "kind": "department",
+   "start_page": 118,
+   "end_page": 131
+  },
+  {
+   "title": "Letters",
+   "kind": "department",
+   "start_page": 132,
+   "end_page": 134
+  },
+  {
+   "title": "On the Mark",
+   "kind": "department",
+   "start_page": 135,
+   "end_page": 136
+  },
+  {
+   "title": "About the Authors",
+   "kind": "department",
+   "start_page": 137,
+   "end_page": null
+  }
+ ],
+ "toc_notes": "TOC spans two pages (images 4 and 5 = printed folios ii–iii; image 6 = printed folio iv). Folios ii, iii, and iv are roman-numeral front matter. First Arabic-numeral page (1) appears on image 8 (Royal Victoria Marathon ad); page 2 appears on image 9 (PowerLung ad). Departments page lists: Editorial p.5, On the Road with Scott Douglas p.8, My Most Unforgettable Ultramarathon/Hardrock 1999 p.83, Quad Cities Marathon p.118, Letters p.132, On the Mark p.135, About the Authors p.137. Features page lists: The Man of Steele Defies Science p.14, Marathon Training: More From Less p.27, The Day of the Amby p.43, Blow Up, Break Down p.51, Track Time p.66, A Run Between Two Oceans p.72. Special Book Bonus: Wobble to Death (Peter Lovesey) p.98.",
+ "matched": [
+  {
+   "id": 905232,
+   "new_title": "On The Mark",
+   "range": "135-136",
+   "score": 0.95,
+   "figs": 0,
+   "dropped_figs": [],
+   "len": 3568
+  },
+  {
+   "id": 905231,
+   "new_title": "Letters",
+   "range": "132-134",
+   "score": 0.95,
+   "figs": 0,
+   "dropped_figs": [],
+   "len": 2268
+  },
+  {
+   "id": 905230,
+   "new_title": "Quad Cities Marathon",
+   "range": "118-131",
+   "score": 0.95,
+   "figs": 3,
+   "dropped_figs": [],
+   "len": 25207
+  },
+  {
+   "id": 905234,
+   "new_title": "Editorial: IQ Aerobics",
+   "range": "5-7",
+   "score": 0.545,
+   "figs": 0,
+   "dropped_figs": [],
+   "len": 6010
+  },
+  {
+   "id": 905236,
+   "new_title": "My Most Unforgettable Ultramarathon",
+   "range": "83-97",
+   "score": 0.505,
+   "figs": 6,
+   "dropped_figs": [],
+   "len": 31105
+  },
+  {
+   "id": 905235,
+   "new_title": "On The Road With Scott Douglas",
+   "range": "8-13",
+   "score": 0.494,
+   "figs": 1,
+   "dropped_figs": [],
+   "len": 15348
+  }
+ ],
+ "unmatched_posts": [
+  {
+   "id": 905233,
+   "title": "The burst of oxygen and nutrients fuses with damaged or near-dead IQ points",
+   "pages": "3-4"
+  }
+ ],
+ "missing_articles": [
+  {
+   "title": "The Man of Steele Defies Science",
+   "author": "Mike Tymn",
+   "pages": "14-26",
+   "kind": "feature"
+  },
+  {
+   "title": "Marathon Training: More From Less",
+   "author": "Guy Avery",
+   "pages": "27-42",
+   "kind": "feature"
+  },
+  {
+   "title": "The Day of the Amby",
+   "author": "Johnny J. Kelley",
+   "pages": "43-50",
+   "kind": "feature"
+  },
+  {
+   "title": "Blow Up, Break Down",
+   "author": "Stephanie Ehret",
+   "pages": "51-65",
+   "kind": "feature"
+  },
+  {
+   "title": "Track Time",
+   "author": "Dave Kromer",
+   "pages": "66-71",
+   "kind": "feature"
+  },
+  {
+   "title": "A Run Between Two Oceans",
+   "author": "Michael Brandt",
+   "pages": "72-82",
+   "kind": "feature"
+  },
+  {
+   "title": "Wobble to Death (Special Book Bonus: Part III)",
+   "author": "Peter Lovesey",
+   "pages": "98-117",
+   "kind": "fiction"
+  },
+  {
+   "title": "About the Authors",
+   "author": "",
+   "pages": "137-None",
+   "kind": "department"
+  }
+ ],
+ "skipped": [],
+ "tokens_in": 94871,
+ "tokens_out": 26764
+}
