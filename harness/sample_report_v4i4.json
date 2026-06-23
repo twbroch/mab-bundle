@@ -1,0 +1,189 @@
+{
+ "pdf": "2000 Vol 4 Issue 4 -Marathon & Beyond.pdf",
+ "offset": 6,
+ "toc_entries": [
+  {
+   "title": "Editorial: Working Assets",
+   "author": "Richard Benyo",
+   "start_page": 1,
+   "kind": "editorial",
+   "end_page": 6
+  },
+  {
+   "title": "On the Road with Scott Douglas",
+   "author": "Scott Douglas",
+   "start_page": 7,
+   "kind": "column",
+   "end_page": 11
+  },
+  {
+   "title": "The Perfection Chasers",
+   "start_page": 12,
+   "kind": "feature",
+   "end_page": 14
+  },
+  {
+   "title": "Running Was My Best Friend",
+   "author": "Mark Conover",
+   "start_page": 15,
+   "kind": "feature",
+   "end_page": 19
+  },
+  {
+   "title": "The Grail Was Sub-2:20",
+   "author": "Michael Sandrock",
+   "start_page": 20,
+   "kind": "feature",
+   "end_page": 26
+  },
+  {
+   "title": "Enjoying the Process",
+   "author": "Jonathan Beverly",
+   "start_page": 27,
+   "kind": "feature",
+   "end_page": 31
+  },
+  {
+   "title": "Running's Been Good",
+   "author": "Richard Benyo",
+   "start_page": 32,
+   "kind": "feature",
+   "end_page": 40
+  },
+  {
+   "title": "It's a Celebration of Life",
+   "author": "Rhonda Provost",
+   "start_page": 41,
+   "kind": "feature",
+   "end_page": 46
+  },
+  {
+   "title": "The Challenge of Testing Limits",
+   "author": "Jenny Hadfield",
+   "start_page": 47,
+   "kind": "feature",
+   "end_page": 52
+  },
+  {
+   "title": "That Sinking Feeling",
+   "author": "Jonathan Beverly",
+   "start_page": 53,
+   "kind": "feature",
+   "end_page": 61
+  },
+  {
+   "title": "A Dog Day Afternoon",
+   "author": "Laurie Parton",
+   "start_page": 62,
+   "kind": "feature",
+   "end_page": 66
+  },
+  {
+   "title": "Marathon Training: More From Less—Part IV",
+   "author": "Guy Avery",
+   "start_page": 67,
+   "kind": "feature",
+   "end_page": 84
+  },
+  {
+   "title": "My Most Unforgettable Ultramarathon (And What I Learned From It): Death Valley 1999",
+   "author": "Marshall Ulrich",
+   "start_page": 85,
+   "kind": "feature",
+   "end_page": 95
+  },
+  {
+   "title": "Wobble to Death (Special Book Bonus, Part IV)",
+   "author": "Peter Lovesey",
+   "start_page": 96,
+   "kind": "fiction",
+   "end_page": 116
+  },
+  {
+   "title": "Santa Clarita Marathon",
+   "start_page": 117,
+   "kind": "department",
+   "end_page": 129
+  },
+  {
+   "title": "Letters",
+   "start_page": 130,
+   "kind": "department",
+   "end_page": 133
+  },
+  {
+   "title": "On the Mark",
+   "start_page": 134,
+   "kind": "column",
+   "end_page": 137
+  },
+  {
+   "title": "About the Authors",
+   "start_page": 138,
+   "kind": "department",
+   "end_page": null
+  }
+ ],
+ "toc_notes": "Image 1 = cover (no folio). Images 2–3 = ads (no folio). Image 4 = TOC page ii (departments column). Image 5 = TOC page iii (features). Image 6 = TOC page iv (features cont. + Special Book Bonus). Image 7 = Editorial p.1. Image 8 = Editorial p.2. Image 9 = Editorial p.3. Page-number calibration drawn from the visible printed folios on images 7, 8, and 9.",
+ "matched": [],
+ "unmatched_posts": [
+  {
+   "id": 905022,
+   "title": "Fourth Annual",
+   "pages": "4-6"
+  }
+ ],
+ "missing_articles": [
+  {
+   "title": "The Perfection Chasers",
+   "author": "",
+   "pages": "12-14",
+   "kind": "feature"
+  },
+  {
+   "title": "Running Was My Best Friend",
+   "author": "Mark Conover",
+   "pages": "15-19",
+   "kind": "feature"
+  },
+  {
+   "title": "The Grail Was Sub-2:20",
+   "author": "Michael Sandrock",
+   "pages": "20-26",
+   "kind": "feature"
+  },
+  {
+   "title": "Enjoying the Process",
+   "author": "Jonathan Beverly",
+   "pages": "27-31",
+   "kind": "feature"
+  },
+  {
+   "title": "Running's Been Good",
+   "author": "Richard Benyo",
+   "pages": "32-40",
+   "kind": "feature"
+  },
+  {
+   "title": "Letters",
+   "author": "",
+   "pages": "130-133",
+   "kind": "department"
+  },
+  {
+   "title": "On the Mark",
+   "author": "",
+   "pages": "134-137",
+   "kind": "column"
+  },
+  {
+   "title": "About the Authors",
+   "author": "",
+   "pages": "138-None",
+   "kind": "department"
+  }
+ ],
+ "skipped": [],
+ "tokens_in": 14823,
+ "tokens_out": 866
+}
