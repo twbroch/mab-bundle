@@ -1,0 +1,215 @@
+{
+ "pdf": "1997 Vol 1 Issue 1 -Marathon & Beyond.pdf",
+ "offset": 6,
+ "toc_entries": [
+  {
+   "title": "Editorial: Origin of the Species",
+   "author": "Richard Benyo",
+   "start_page": 1,
+   "kind": "editorial",
+   "end_page": 3
+  },
+  {
+   "title": "On the Road with Kathrine Switzer",
+   "author": "Kathrine Switzer",
+   "start_page": 4,
+   "kind": "column",
+   "end_page": 12
+  },
+  {
+   "title": "Marathon 101",
+   "author": "Richard Benyo",
+   "start_page": 13,
+   "kind": "feature",
+   "end_page": 26
+  },
+  {
+   "title": "Walking the Walk",
+   "author": "Joe Oakes",
+   "start_page": 27,
+   "kind": "feature",
+   "end_page": 41
+  },
+  {
+   "title": "Analgesics: Cure or Curse?",
+   "author": "Dr. Robert Johnson",
+   "start_page": 42,
+   "kind": "feature",
+   "end_page": 48
+  },
+  {
+   "title": "One Step Beyond",
+   "author": "Timothy Martin",
+   "start_page": 49,
+   "kind": "feature",
+   "end_page": 60
+  },
+  {
+   "title": "My Most Unforgettable Marathon (And What I Learned From It)",
+   "author": "John Keston",
+   "start_page": 61,
+   "kind": "department",
+   "end_page": 72
+  },
+  {
+   "title": "The Great Six-Day Races",
+   "author": "Ed Dodd",
+   "start_page": 73,
+   "kind": "feature",
+   "end_page": 90
+  },
+  {
+   "title": "Vancouver International Marathon: An International Designation Is Earned, Not Bestowed",
+   "start_page": 91,
+   "kind": "feature",
+   "end_page": 103
+  },
+  {
+   "title": "Letters to the Editor",
+   "start_page": 104,
+   "kind": "department",
+   "end_page": 107
+  },
+  {
+   "title": "On the Mark",
+   "start_page": 108,
+   "kind": "department",
+   "end_page": 113
+  },
+  {
+   "title": "About the Authors",
+   "start_page": 114,
+   "kind": "department",
+   "end_page": null
+  }
+ ],
+ "toc_notes": "Volume 1, Issue 1, January 1997. Image 4 is the TOC (Departments) page showing folio \"ii\". Image 5 is the TOC (Features) page showing folio \"iii\". Image 6 is the Mission Statement page showing folio \"iv\". Images 7–9 are the Editorial pages showing folios 1, 2, and 3. The TOC is split across two pages: Departments (p. ii) and Features (p. iii). The Special Book Bonus section (The Great Six-Day Races by Ed Dodd, p. 73) appears on the Features TOC page. \"On the Road with Kathrine Switzer\" is listed as a column/department starting at page 4 with a travel sub-description. Folio numbers ii, iii, iv are Roman numerals for front matter; calibration uses the first Arabic-numeral page visible (folio 1 on image 7).",
+ "applied": [
+  {
+   "id": 905047,
+   "new_title": "Vancouver International Marathon",
+   "range": "91-103",
+   "score": 0.95,
+   "figs": 4,
+   "dropped_figs": [],
+   "len": 25393
+  },
+  {
+   "id": 905036,
+   "new_title": "The Great Six-Day Races",
+   "range": "73-90",
+   "score": 0.95,
+   "figs": 4,
+   "dropped_figs": [],
+   "len": 38141
+  },
+  {
+   "id": 905033,
+   "new_title": "Analgesics: Cure or Curse?",
+   "range": "42-48",
+   "score": 0.95,
+   "figs": 0,
+   "dropped_figs": [],
+   "len": 16040
+  },
+  {
+   "id": 905032,
+   "new_title": "On The Road with Kathrine Switzer",
+   "range": "4-12",
+   "score": 0.95,
+   "figs": 1,
+   "dropped_figs": [],
+   "len": 18731
+  },
+  {
+   "id": 905030,
+   "new_title": "Walking the Walk",
+   "range": "27-41",
+   "score": 0.95,
+   "figs": 2,
+   "dropped_figs": [
+    {
+     "n": 1,
+     "caption": "The acknowledged master at distance-based walking ",
+     "why": "pullquote"
+    }
+   ],
+   "len": 35646
+  },
+  {
+   "id": 905029,
+   "new_title": "Marathon 101",
+   "range": "13-26",
+   "score": 0.95,
+   "figs": 5,
+   "dropped_figs": [
+    {
+     "n": 1,
+     "caption": "Pierre de Coubertin",
+     "why": "pullquote"
+    }
+   ],
+   "len": 27652
+  },
+  {
+   "id": 905028,
+   "new_title": "On THE Mark",
+   "range": "108-113",
+   "score": 0.95,
+   "figs": 0,
+   "dropped_figs": [],
+   "len": 13311
+  },
+  {
+   "id": 905035,
+   "new_title": "My Most Unforgettable Marathon",
+   "range": "61-72",
+   "score": 0.6,
+   "figs": 4,
+   "dropped_figs": [],
+   "len": 23947
+  }
+ ],
+ "deferred": [],
+ "misaligned": [
+  {
+   "id": 905034,
+   "expected": "One Step Beyond",
+   "got": "When It Comes to Running Really Long, Be Careful What You Wish For . . .",
+   "sim": 0.175,
+   "range": "49-60"
+  }
+ ],
+ "unmatched_posts": [
+  {
+   "id": 905014,
+   "title": "Editorial: January/February 1997",
+   "pages": "3-3",
+   "clen": 2989,
+   "st": "publish"
+  }
+ ],
+ "missing_articles": [
+  {
+   "title": "Letters to the Editor",
+   "author": "",
+   "pages": "104-107",
+   "kind": "department"
+  },
+  {
+   "title": "About the Authors",
+   "author": "",
+   "pages": "114-None",
+   "kind": "department"
+  }
+ ],
+ "skipped": [
+  {
+   "id": 905013,
+   "title": "Origin of the Species",
+   "reason": "draft:draft"
+  }
+ ],
+ "tokens_in": 209967,
+ "tokens_out": 66868
+}

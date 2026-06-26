@@ -107,6 +107,10 @@ def title_sim(a,b):
 
 def page_start(pages):
     m=re.match(r"\s*(\d+)",pages or ""); return int(m.group(1)) if m else None
+def page_range(pages):
+    m=re.match(r"\s*(\d+)\s*[-–]\s*(\d+)",pages or "")
+    if m: return (int(m.group(1)),int(m.group(2)))
+    s=page_start(pages); return (s,s) if s else None
 
 def match_posts(posts, entries):
     """Greedy best title match per post; page proximity as tiebreaker. Returns matches + leftovers."""
@@ -254,7 +258,7 @@ def main():
     log(f"TOC: {len(ents)} entries | offset anchor={anc_off} (via '{(anc_title or '')[:30]}') folio={folio_off} -> using {offset}")
     matches,un_posts,un_ents=match_posts(posts,ents)
     report={"pdf":os.path.basename(args.pdf),"offset":offset,"toc_entries":ents,"toc_notes":tnotes,
-            "matched":[],"unmatched_posts":un_posts,"missing_articles":[{"title":e["title"],"author":e.get("author",""),
+            "applied":[],"deferred":[],"misaligned":[],"unmatched_posts":un_posts,"missing_articles":[{"title":e["title"],"author":e.get("author",""),
             "pages":f"{e['start_page']}-{e.get('end_page')}","kind":e.get("kind","")} for e in un_ents],
             "skipped":[],"tokens_in":tu.input_tokens,"tokens_out":tu.output_tokens}
     if args.only_toc or offset is None:
@@ -262,8 +266,16 @@ def main():
         Path(args.report or (args.stage+"/_report.json")).write_text(json.dumps(report,indent=1,ensure_ascii=False))
         print(json.dumps({"offset":offset,"matches":[(m['post']['id'],m['entry']['title'],m['entry']['start_page'],m['entry'].get('end_page'),m['score']) for m in matches],"unmatched_posts":[p['id'] for p in un_posts],"missing":len(un_ents)},indent=1))
         return
+    STUB_MAX=800
     for m in matches:
-        pid=int(m["post"]["id"]); e=m["entry"]
+        post=m["post"]; pid=int(post["id"]); e=m["entry"]
+        # --- pre-extraction skips (save cost; protect drafts/stubs) ---
+        st=post.get("st") or post.get("status") or "publish"
+        clen=int(post.get("clen") or 0)
+        if st!="publish":
+            log(f"[{pid}] SKIP draft (status={st})"); report["skipped"].append({"id":pid,"title":post["title"],"reason":"draft:"+st}); continue
+        if clen and clen<STUB_MAX:
+            log(f"[{pid}] SKIP stub (clen={clen})"); report["skipped"].append({"id":pid,"title":post["title"],"reason":f"stub:{clen}"}); continue
         lo=e["start_page"]; hi=e.get("end_page") or lo
         plo,phi=lo+offset,hi+offset
         log(f"[{pid}] {e['title'][:40]!r} printed {lo}-{hi} -> PDF {plo}-{phi}")
@@ -272,25 +284,41 @@ def main():
         except ContentFiltered as cf:
             log(f"   SKIP content-filter: {cf}"); report["skipped"].append({"id":pid,"title":e["title"],"reason":"content-filter"}); continue
         report["tokens_in"]+=ti; report["tokens_out"]+=to
-        # title-verify gate: reject misaligned extractions (wrong offset -> ads/neighbour article)
         got=art.get("title","") or ""
         vsim=title_sim(got, e["title"])
         if vsim < 0.5:
             log(f"   REJECT misaligned: got '{got[:40]}' vs expected '{e['title'][:40]}' (sim {vsim:.2f})")
-            report.setdefault("misaligned",[]).append({"id":pid,"expected":e["title"],"got":got,"sim":round(vsim,3),"range":f"{lo}-{hi}"})
-            continue
+            report.setdefault("misaligned",[]).append({"id":pid,"expected":e["title"],"got":got,"sim":round(vsim,3),"range":f"{lo}-{hi}"}); continue
         body,figs,dropped=qc_clean(art,pid,args.stage,args.pdf,plo)
-        rec={"id":pid,"old_title":m["post"]["title"],"title":got,"subtitle":art.get("subtitle",""),
+        # --- safe/defer classification (no content loss for APPLY) ---
+        crng=page_range(post.get("pages")); tspan=hi-lo+1
+        if crng:
+            cspan=crng[1]-crng[0]+1
+            safe = (abs(lo-crng[0])<=3) and (tspan >= 0.5*cspan) and (len(body) >= 0.40*max(1,clen))
+            why = f"true {lo}-{hi} vs cur {crng[0]}-{crng[1]}, len {len(body)}/{clen}"
+        else:
+            safe = (len(body) >= 0.55*max(1,clen)) if clen else True
+            why = f"no-pages, len {len(body)}/{clen}"
+        if not safe:
+            log(f"   DEFER over-merge: {why}")
+            report.setdefault("deferred",[]).append({"id":pid,"title":got,"true_range":f"{lo}-{hi}","cur_pages":post.get("pages",""),"new_len":len(body),"cur_clen":clen,"why":why})
+            try: os.remove(args.stage+f"/{pid}.json")
+            except Exception: pass
+            for fg in figs:
+                try: os.remove(args.stage+"/"+fg["file"])
+                except Exception: pass
+            continue
+        rec={"id":pid,"old_title":post["title"],"title":got,"subtitle":art.get("subtitle",""),
              "author":art.get("author",""),"body_html":body,"figures":figs,"notes":art.get("notes","")}
         Path(args.stage+f"/{pid}.json").write_text(json.dumps(rec,ensure_ascii=False))
-        report["matched"].append({"id":pid,"new_title":rec["title"],"range":f"{lo}-{hi}","score":m["score"],
+        report["applied"].append({"id":pid,"new_title":rec["title"],"range":f"{lo}-{hi}","score":m["score"],
                                   "figs":len(figs),"dropped_figs":dropped,"len":len(body)})
-        log(f"   -> {pid}.json  '{rec['title'][:40]}'  figs={len(figs)} dropped={len(dropped)} {len(body)}B")
+        log(f"   APPLY -> {pid}.json  '{rec['title'][:40]}'  figs={len(figs)} dropped={len(dropped)} {len(body)}B")
         time.sleep(0.2)
     Path(args.report or (args.stage+"/_report.json")).write_text(json.dumps(report,indent=1,ensure_ascii=False))
-    log(f"\nDONE issue. matched={len(report['matched'])} skipped={len(report['skipped'])} "
-        f"unmatched_posts={len(un_posts)} missing_articles={len(un_ents)} "
-        f"tokens in={report['tokens_in']} out={report['tokens_out']}")
+    log(f"\nDONE issue. APPLY={len(report['applied'])} deferred={len(report.get('deferred',[]))} "
+        f"skipped={len(report['skipped'])} misaligned={len(report.get('misaligned',[]))} "
+        f"unmatched={len(un_posts)} missing={len(un_ents)} tokens in={report['tokens_in']} out={report['tokens_out']}")
     print(f"report -> {args.report or (args.stage+'/_report.json')}")
 
 if __name__=="__main__": main()
