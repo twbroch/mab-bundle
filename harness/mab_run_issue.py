@@ -194,6 +194,8 @@ def extract_article(client,pdf,plo,phi):
         merged=None; base=0; usage_in=usage_out=0
         for ch in chunks:
             art,u=vis_extract(client,ch); usage_in+=u.input_tokens; usage_out+=u.output_tokens
+            if not isinstance(art.get("figures"),list): art["figures"]=[]   # model occasionally returns a non-list
+            if not isinstance(art.get("body_html"),str): art["body_html"]=str(art.get("body_html") or "")
             for f in art.get("figures",[]): f["page_index"]=f.get("page_index",0)+base
             base+=len(ch)
             if merged is None: merged=art
@@ -211,7 +213,7 @@ def qc_clean(art, pid, outdir, pdf, plo):
     b=ART_LINE.sub("", b)                       # strip ad-artifact paragraphs anywhere
     b=re.split(r"<h[23][^>]*>\s*The Rest of the Pack\s*</h[23]>", b, 1, re.I)[0]  # cut recurring race-index appendix + trailing sub-ad
     body_norm=norm(re.sub(r"<[^>]+>"," ",b))
-    figs_in=art.get("figures",[]) or []
+    figs_in=art.get("figures") if isinstance(art.get("figures"),list) else []
     # decide keep/drop; origN is the 1-based index that matches [[FIGURE:origN]] in the body
     kept=[]; dropped=[]
     for i,f in enumerate(figs_in,1):
@@ -246,8 +248,7 @@ def main():
     ap.add_argument("--only",default="",help="restrict to these post ids (csv)")
     args=ap.parse_args()
     posts=json.loads(Path(args.posts).read_text())
-    if args.only:
-        keep={int(x) for x in args.only.split(",")}; posts=[p for p in posts if int(p["id"]) in keep]
+    keep={int(x) for x in args.only.split(",")} if args.only else None  # restrict EXTRACTION, not matching
     Path(args.stage).mkdir(parents=True,exist_ok=True)
     client=anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
     slo,shi=(int(x) for x in args.toc_scan.split("-"))
@@ -269,6 +270,7 @@ def main():
     STUB_MAX=800
     for m in matches:
         post=m["post"]; pid=int(post["id"]); e=m["entry"]
+        if keep and pid not in keep: continue   # --only: matched on full set, extract subset
         # --- pre-extraction skips (save cost; protect drafts/stubs) ---
         st=post.get("st") or post.get("status") or "publish"
         clen=int(post.get("clen") or 0)
@@ -290,15 +292,15 @@ def main():
             log(f"   REJECT misaligned: got '{got[:40]}' vs expected '{e['title'][:40]}' (sim {vsim:.2f})")
             report.setdefault("misaligned",[]).append({"id":pid,"expected":e["title"],"got":got,"sim":round(vsim,3),"range":f"{lo}-{hi}"}); continue
         body,figs,dropped=qc_clean(art,pid,args.stage,args.pdf,plo)
-        # --- safe/defer classification (no content loss for APPLY) ---
-        crng=page_range(post.get("pages")); tspan=hi-lo+1
-        if crng:
-            cspan=crng[1]-crng[0]+1
-            safe = (abs(lo-crng[0])<=3) and (tspan >= 0.5*cspan) and (len(body) >= 0.40*max(1,clen))
-            why = f"true {lo}-{hi} vs cur {crng[0]}-{crng[1]}, len {len(body)}/{clen}"
+        # --- safe/defer classification: title-verify (above) ensures correct article;
+        #     orphan-safety = LENGTH (new content must be >=40% of current; over-merges are << ).
+        #     mab_pages ranges are often wrong, so they are NOT used for the gate.
+        if clen:
+            ratio=len(body)/clen
+            safe = ratio >= 0.40
+            why = f"len {len(body)}/{clen} ratio={ratio:.2f}, true {lo}-{hi} vs cur {post.get('pages','')}"
         else:
-            safe = (len(body) >= 0.55*max(1,clen)) if clen else True
-            why = f"no-pages, len {len(body)}/{clen}"
+            safe = True; why = f"no-clen, len {len(body)}"
         if not safe:
             log(f"   DEFER over-merge: {why}")
             report.setdefault("deferred",[]).append({"id":pid,"title":got,"true_range":f"{lo}-{hi}","cur_pages":post.get("pages",""),"new_len":len(body),"cur_clen":clen,"why":why})
