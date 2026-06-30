@@ -212,6 +212,10 @@ def qc_clean(art, pid, outdir, pdf, plo):
     b=art.get("body_html","") or ""
     b=ART_LINE.sub("", b)                       # strip ad-artifact paragraphs anywhere
     b=re.split(r"<h[23][^>]*>\s*The Rest of the Pack\s*</h[23]>", b, 1, re.I)[0]  # cut recurring race-index appendix + trailing sub-ad
+    mts=re.search(r"total score for", b, re.I)   # race profiles END at the scorecard; cut appendix/letters after it
+    if mts:
+        h2=re.search(r"<h2", b[mts.end():], re.I)
+        if h2: b=b[:mts.end()+h2.start()]
     body_norm=norm(re.sub(r"<[^>]+>"," ",b))
     figs_in=art.get("figures") if isinstance(art.get("figures"),list) else []
     # decide keep/drop; origN is the 1-based index that matches [[FIGURE:origN]] in the body
