@@ -65,8 +65,9 @@ add_action( 'wp_head', function () {
 		|| is_tax( 'mab_issue' ) || is_tax( 'mab_topic' ) || is_tax( 'mab_author' ) || is_tax( 'mab_type' ) ) ) return;
 	?>
 <style id="mh-mab-css">
+body.post-type-archive-mab_article,body.single-mab_article,body.tax-mab_issue,body.tax-mab_topic,body.tax-mab_author,body.tax-mab_type{overflow-x:hidden}
 .mab-wrap{max-width:1080px;margin:0 auto;padding:0 20px 60px;font-family:Lora,Georgia,serif;color:#1e2430}
-.mab-hero{background:#141a26;color:#f4efe6;margin:0 -9999px;padding:52px 9999px 44px;text-align:center}
+.mab-hero{background:#141a26;color:#f4efe6;width:100vw;margin-left:calc(50% - 50vw);padding:52px calc(50vw - 50%) 44px;text-align:center;box-sizing:border-box}
 .mab-hero .k{letter-spacing:.22em;font-size:12px;text-transform:uppercase;color:#e8a35c;font-family:Shuttleblock,system-ui,sans-serif}
 .mab-hero h1{font-family:Shuttleblock,system-ui,sans-serif;font-size:clamp(30px,5vw,52px);margin:.25em 0 .2em;color:#fff}
 .mab-hero p{max-width:640px;margin:0 auto;font-size:17px;line-height:1.6;color:#cfd4de}
