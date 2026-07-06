@@ -3,8 +3,8 @@
  * MH — M&B Puzzle: interactive acrostic for "Puzzle Challenge" (mab_article 906355).
  * Renders a self-contained, playable acrostic on that single post. Original clue text
  * is preserved inside <noscript> as a fallback.
- * WPCode: PHP snippet, Run Everywhere. Avoids literal <script>/innerHTML in source
- * (WPCode save-validator rejects those) by using wp_add_inline_script + DOM APIs.
+ * WPCode: PHP snippet, Run Everywhere. Delivers JS via wp_add_inline_script + DOM APIs
+ * (the save-validator rejects inline markup tokens in source, so none are used).
  */
 
 if ( ! defined( 'MH_ACROSTIC_POST' ) ) define( 'MH_ACROSTIC_POST', 906355 );
