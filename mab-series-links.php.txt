@@ -1,0 +1,70 @@
+<?php
+/**
+ * MH — M&B Series cross-links. Adds a "Part N of a series" nav (prev / next / all parts)
+ * to any mab_article that belongs to a detected multi-part series. Pure links, no scripts.
+ * WPCode: PHP snippet, Run Everywhere.
+ */
+function mh_series_map(){
+ static $m=null; if($m!==null) return $m;
+ $m=array(
+  'thirty-phone-booths-to-boston'=>array('name'=>'Thirty Phone Booths to Boston','ids'=>array(905452,905472,905494,905516,905536)),
+  'dr-sheehan-on-running'=>array('name'=>'Dr. Sheehan on Running','ids'=>array(905592,905613,905634,905669,905692,905716,905748,905772)),
+  'flanagan-s-run'=>array('name'=>'Flanagan’s Run','ids'=>array(905794,905828,905851,905871,905894,905914,905935,905968,905994,906094,906116,906137,906170,906190,906211)),
+  'boulder-to-petoskey-one-step-at-a-time'=>array('name'=>'Boulder to Petoskey, One Step at a Time','ids'=>array(906013,906030,906054)),
+  'running-my-life'=>array('name'=>'Running My Life','ids'=>array(906192,906229,906236)),
+  'the-purple-runner'=>array('name'=>'The Purple Runner','ids'=>array(906232,906252,906271,906292,906313,906333,906357,906390,906409,906433,906455,906474)),
+  'going-far'=>array('name'=>'Going Far','ids'=>array(906496,906528,906554,906574,906594,906610,906629,906651,906673,906695,906716,906750,906771,906795)),
+  'how-i-became-gary-fanelli'=>array('name'=>'How I Became Gary Fanelli','ids'=>array(906710,906733,906751,906772)),
+  'the-great-six-day-races'=>array('name'=>'The Great Six-Day Races','ids'=>array(905056,905076,905096,905128,905151)),
+  'the-art-of-the-ultramarathoner'=>array('name'=>'The Art of the Ultramarathoner','ids'=>array(905287,9907106,905334)),
+  'just-call-me-jock'=>array('name'=>'Just Call Me Jock','ids'=>array(9907119,9907125,905356,9907138)),
+  'marathon-training-odyssey'=>array('name'=>'Marathon Training Odyssey','ids'=>array(905611,905629)),
+  'half-marathon-training-that-will-improve-your-performance'=>array('name'=>'Half-Marathon Training That Will Improve Your Performance','ids'=>array(905512,905530,905548)),
+  'the-death-valley-300'=>array('name'=>'The Death Valley 300','ids'=>array(906815,906836)),
+);
+ return $m;
+}
+function mh_series_lookup($id){
+ foreach(mh_series_map() as $slug=>$s){
+   $i=array_search((int)$id,$s['ids'],true);
+   if($i!==false) return array($slug,$s,$i);
+ }
+ return null;
+}
+add_filter('the_content',function($content){
+ if(!is_singular('mab_article')||!in_the_loop()||!is_main_query()) return $content;
+ $hit=mh_series_lookup(get_the_ID());
+ if(!$hit) return $content;
+ list($slug,$s,$i)=$hit; $ids=$s['ids']; $n=count($ids);
+ $css='<style id="mh-series-css">'
+ .'.mab-series{font-family:ui-sans-serif,system-ui,sans-serif;border:1px solid #d9d1be;border-left:4px solid #EA7603;'
+ .'background:#faf7f0;border-radius:8px;padding:14px 16px;margin:0 0 22px}'
+ .'.mab-series .k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#b05a02;font-weight:700}'
+ .'.mab-series .nm{font-family:Lora,Georgia,serif;font-size:19px;font-weight:700;color:#1e2430;margin:2px 0 10px}'
+ .'.mab-series .nav{display:flex;gap:10px;flex-wrap:wrap}'
+ .'.mab-series .nav a{flex:1;min-width:160px;border:1px solid #e0d9c8;border-radius:7px;padding:8px 12px;'
+ .'text-decoration:none;color:#1e2430;background:#fff;font-size:13.5px}'
+ .'.mab-series .nav a:hover{border-color:#EA7603}'
+ .'.mab-series .nav a span{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#b05a02;font-weight:700;margin-bottom:2px}'
+ .'.mab-series .nav a.nx{text-align:right}'
+ .'.mab-series details{margin-top:10px}.mab-series summary{cursor:pointer;font-size:13px;font-weight:600;color:#26324a}'
+ .'.mab-series ol{margin:10px 0 0;padding-left:0;list-style:none;display:grid;gap:4px}'
+ .'.mab-series ol li{font-size:13.5px}.mab-series ol a{color:#b05a02;text-decoration:none}.mab-series ol a:hover{text-decoration:underline}'
+ .'.mab-series ol .cur{color:#1e2430;font-weight:700}'
+ .'.mab-series ol .pn{display:inline-block;min-width:58px;color:#8a8474;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}'
+ .'</style>';
+ static $css_done=false; $style = $css_done?'':$css; $css_done=true;
+ $nav='<nav class="mab-series" aria-label="Series navigation">'
+  .'<div class="k">Part '.($i+1).' of '.$n.' &middot; a series</div>'
+  .'<div class="nm">'.esc_html($s['name']).'</div><div class="nav">';
+ if($i>0){$p=$ids[$i-1];$nav.='<a rel="prev" href="'.esc_url(get_permalink($p)).'"><span>&lsaquo; Previous — Part '.$i.'</span>'.esc_html(get_the_title($p)).'</a>';}
+ if($i<$n-1){$x=$ids[$i+1];$nav.='<a class="nx" rel="next" href="'.esc_url(get_permalink($x)).'"><span>Next — Part '.($i+2).' &rsaquo;</span>'.esc_html(get_the_title($x)).'</a>';}
+ $nav.='</div><details><summary>All '.$n.' parts</summary><ol>';
+ foreach($ids as $j=>$id){
+   $lab='Part '.($j+1);
+   if($id===get_the_ID()) $nav.='<li><span class="pn">'.$lab.'</span> <span class="cur">'.esc_html(get_the_title($id)).' &larr; you are here</span></li>';
+   else $nav.='<li><span class="pn">'.$lab.'</span> <a href="'.esc_url(get_permalink($id)).'">'.esc_html(get_the_title($id)).'</a></li>';
+ }
+ $nav.='</ol></details></nav>';
+ return $style.$nav.$content;
+},25);
