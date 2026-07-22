@@ -171,6 +171,8 @@ body.post-type-archive-mab_article,body.single-mab_article,body.tax-mab_issue,bo
 .mab-pagination .current{background:#141a26;color:#fff;border-color:#141a26}
 .mab-backlink{display:inline-block;margin:22px 0 0;font-size:13px;font-family:Shuttleblock,system-ui,sans-serif;color:#b05a02;text-decoration:none}
 .mab-noresults{font-family:Lora,Georgia,serif;font-size:17px;line-height:1.6;color:#1e2430}.mab-noresults a{color:#b05a02}
+/* on the M&B search page, suppress the theme's generic "How Can We Help?" search banner (our own hero replaces it) */
+body.search.post-type-archive-mab_article .paging-navigation{display:none}
 @media(max-width:640px){.mab-hero{padding-top:36px;padding-bottom:32px}.mab-issuenav{flex-direction:column}
 /* tighten article side padding on mobile: theme container + inside-article + our body wrapper were triple-stacking */
 body.single-mab_article .grid-container.hfeed{padding-left:0;padding-right:0}
