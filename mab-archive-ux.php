@@ -70,6 +70,26 @@ function mh_mab_card( $post ) {
 	<?php return ob_get_clean();
 }
 
+// True on any MAB surface (hub, article, or any MAB taxonomy term page).
+function mh_mab_is_context() {
+	return is_post_type_archive( 'mab_article' ) || is_singular( 'mab_article' )
+		|| is_tax( 'mab_issue' ) || is_tax( 'mab_topic' ) || is_tax( 'mab_author' ) || is_tax( 'mab_type' );
+}
+
+/* ---------- Permanent noindex (independent of Rank Math UI) ---------- */
+// The archive must ALWAYS be noindex,nofollow. Force it through Rank Math when
+// present (avoids a duplicate tag), and fall back to a raw meta tag if Rank Math
+// is ever disabled. This makes the noindex un-flippable via any plugin setting.
+add_filter( 'rank_math/frontend/robots', function ( $robots ) {
+	if ( mh_mab_is_context() ) return array( 'index' => 'noindex', 'follow' => 'nofollow' );
+	return $robots;
+} );
+add_action( 'wp_head', function () {
+	if ( mh_mab_is_context() && ! function_exists( 'rank_math' ) ) {
+		echo '<meta name="robots" content="noindex, nofollow" />' . "\n";
+	}
+}, 1 );
+
 /* ---------- CSS ---------- */
 
 add_action( 'wp_head', function () {
@@ -79,7 +99,7 @@ add_action( 'wp_head', function () {
 <style id="mh-mab-css">
 body.post-type-archive-mab_article,body.single-mab_article,body.tax-mab_issue,body.tax-mab_topic,body.tax-mab_author,body.tax-mab_type{overflow-x:hidden}
 .mab-wrap{max-width:1080px;margin:0 auto;padding:0 20px 60px;font-family:Lora,Georgia,serif;color:#1e2430}
-.mab-hero{background:#141a26;color:#f4efe6;width:100vw;margin-left:calc(50% - 50vw);padding:52px calc(50vw - 50%) 44px;text-align:center;box-sizing:border-box}
+.mab-hero{background:#141a26;color:#f4efe6;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding:52px calc(50vw - 50%) 44px;text-align:center;box-sizing:border-box}
 .mab-hero .k{letter-spacing:.22em;font-size:12px;text-transform:uppercase;color:#e8a35c;font-family:Shuttleblock,system-ui,sans-serif}
 .mab-hero h1{font-family:Shuttleblock,system-ui,sans-serif;font-size:clamp(30px,5vw,52px);margin:.25em 0 .2em;color:#fff}
 .mab-hero p{max-width:640px;margin:0 auto;font-size:17px;line-height:1.6;color:#cfd4de}
@@ -118,6 +138,7 @@ body.post-type-archive-mab_article,body.single-mab_article,body.tax-mab_issue,bo
 .mab-issues .yr{font-size:12px;color:#8b8f98}
 .mab-hero__cover{display:block;width:158px;max-width:42vw;height:auto;margin:0 auto 20px;border-radius:5px;box-shadow:0 12px 34px rgba(0,0,0,.4)}
 /* single article */
+.mab-archive-banner{display:none}
 .mab-metabar{background:#f4efe6;border:1px solid #e0d9c8;border-radius:10px;padding:14px 18px;margin:0 0 26px;font-size:14px;line-height:1.7;font-family:Shuttleblock,system-ui,sans-serif}
 .mab-metabar .crumb{font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
 .mab-metabar .crumb a{color:#b05a02;text-decoration:none}
@@ -149,7 +170,20 @@ body.post-type-archive-mab_article,body.single-mab_article,body.tax-mab_issue,bo
 .mab-pagination a,.mab-pagination span{display:inline-block;padding:8px 13px;border:1px solid #e0d9c8;border-radius:6px;margin:0 3px;text-decoration:none;color:#1e2430}
 .mab-pagination .current{background:#141a26;color:#fff;border-color:#141a26}
 .mab-backlink{display:inline-block;margin:22px 0 0;font-size:13px;font-family:Shuttleblock,system-ui,sans-serif;color:#b05a02;text-decoration:none}
-@media(max-width:640px){.mab-hero{padding-top:36px;padding-bottom:32px}.mab-issuenav{flex-direction:column}}
+.mab-noresults{font-family:Lora,Georgia,serif;font-size:17px;line-height:1.6;color:#1e2430}.mab-noresults a{color:#b05a02}
+@media(max-width:640px){.mab-hero{padding-top:36px;padding-bottom:32px}.mab-issuenav{flex-direction:column}
+/* tighten article side padding on mobile: theme container + inside-article + our body wrapper were triple-stacking */
+body.single-mab_article .grid-container.hfeed{padding-left:0;padding-right:0}
+body.single-mab_article .inside-article{padding-left:16px;padding-right:16px}
+body.single-mab_article .mab-article-body{padding-left:0;padding-right:0}
+}
+/* desktop: article column was hugging left with a ~95px gutter to the sidebar; let it fill and trim the right padding so it sits ~50px from the sidebar */
+@media(min-width:641px){
+body.single-mab_article .site-content{justify-content:center}
+body.single-mab_article #primary.content-area{flex:1 1 0;max-width:760px!important}
+body.single-mab_article .inside-article{padding-left:40px;padding-right:20px}
+body.single-mab_article .mab-article-body{padding-left:0;padding-right:0}
+}
 </style>
 	<?php
 }, 99 );
@@ -157,6 +191,7 @@ body.post-type-archive-mab_article,body.single-mab_article,body.tax-mab_issue,bo
 /* ---------- router: hub + term archives ---------- */
 
 add_action( 'template_redirect', function () {
+	if ( is_search() && ( ( isset( $_GET['post_type'] ) && 'mab_article' === $_GET['post_type'] ) || 'mab_article' === get_query_var( 'post_type' ) ) ) { mh_mab_render_search(); exit; }
 	if ( is_post_type_archive( 'mab_article' ) && ! is_search() ) { mh_mab_render_hub(); exit; }
 	if ( is_tax( 'mab_issue' ) )  { mh_mab_render_issue_toc(); exit; }
 	if ( is_tax( 'mab_topic' ) || is_tax( 'mab_author' ) || is_tax( 'mab_type' ) ) { mh_mab_render_term_grid(); exit; }
@@ -278,6 +313,39 @@ function mh_mab_render_term_grid() {
 			<div class="mab-pagination"><?php
 				echo paginate_links( array( 'total' => $q->max_num_pages, 'current' => $paged, 'prev_text' => '&larr;', 'next_text' => '&rarr;' ) );
 			?></div>
+			<a class="mab-backlink" href="<?php echo esc_url( get_post_type_archive_link( 'mab_article' ) ); ?>">&larr; Back to the full archive</a>
+		</div>
+	</div>
+	<?php
+	get_footer();
+}
+
+function mh_mab_render_search() {
+	get_header();
+	$term  = get_search_query();
+	$paged = max( 1, (int) get_query_var( 'paged' ) );
+	$q = new WP_Query( array( 'post_type' => 'mab_article', 's' => $term, 'posts_per_page' => 24, 'paged' => $paged ) );
+	?>
+	<div class="mab-wrap">
+		<div class="mab-hero">
+			<div class="k">Marathon &amp; Beyond Archive · Search</div>
+			<h1><?php echo '' !== $term ? '&ldquo;' . esc_html( $term ) . '&rdquo;' : 'Search the archive'; ?></h1>
+			<p><?php echo (int) $q->found_posts; ?> result<?php echo 1 === (int) $q->found_posts ? '' : 's'; ?><?php echo '' === $term ? ' &mdash; search every restored article' : ''; ?></p>
+			<form class="mab-search" action="<?php echo esc_url( home_url( '/' ) ); ?>" method="get" role="search">
+				<input type="search" name="s" value="<?php echo esc_attr( $term ); ?>" placeholder="Search the archive &mdash; e.g. Boston, heat, Comrades&hellip;" />
+				<input type="hidden" name="post_type" value="mab_article" />
+				<button type="submit">Search</button>
+			</form>
+		</div>
+		<div class="mab-sec">
+			<?php if ( $q->have_posts() ) : ?>
+			<div class="mab-grid"><?php foreach ( $q->posts as $p ) echo mh_mab_card( $p ); ?></div>
+			<?php if ( $q->max_num_pages > 1 ) : ?>
+			<div class="mab-pagination"><?php echo paginate_links( array( 'base' => add_query_arg( 'paged', '%#%' ), 'format' => '', 'total' => $q->max_num_pages, 'current' => $paged, 'prev_text' => '&larr;', 'next_text' => '&rarr;' ) ); ?></div>
+			<?php endif; ?>
+			<?php else : ?>
+			<p class="mab-noresults">No articles matched<?php echo '' !== $term ? ' &ldquo;' . esc_html( $term ) . '&rdquo;' : ''; ?>. Try a broader term, or <a href="<?php echo esc_url( get_post_type_archive_link( 'mab_article' ) ); ?>">browse by issue, topic, or author</a>.</p>
+			<?php endif; ?>
 			<a class="mab-backlink" href="<?php echo esc_url( get_post_type_archive_link( 'mab_article' ) ); ?>">&larr; Back to the full archive</a>
 		</div>
 	</div>
