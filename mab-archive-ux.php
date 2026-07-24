@@ -193,6 +193,8 @@ body.single-mab_article .mab-article-body{padding-left:0;padding-right:0}
 /* ---------- router: hub + term archives ---------- */
 
 add_action( 'template_redirect', function () {
+	// Retired the old /marathon-and-beyond/ landing page (ID 32477, shortcode [mab_archive_browse]) — send it to the canonical hub.
+	if ( is_page( 32477 ) ) { wp_safe_redirect( get_post_type_archive_link( 'mab_article' ), 301 ); exit; }
 	if ( is_search() && ( ( isset( $_GET['post_type'] ) && 'mab_article' === $_GET['post_type'] ) || 'mab_article' === get_query_var( 'post_type' ) ) ) { mh_mab_render_search(); exit; }
 	if ( is_post_type_archive( 'mab_article' ) && ! is_search() && isset( $_GET['mab_volume'] ) && ctype_digit( (string) $_GET['mab_volume'] ) ) { mh_mab_render_volume(); exit; }
 	if ( is_post_type_archive( 'mab_article' ) && ! is_search() ) { mh_mab_render_hub(); exit; }
