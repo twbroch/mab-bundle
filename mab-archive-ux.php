@@ -194,6 +194,7 @@ body.single-mab_article .mab-article-body{padding-left:0;padding-right:0}
 
 add_action( 'template_redirect', function () {
 	if ( is_search() && ( ( isset( $_GET['post_type'] ) && 'mab_article' === $_GET['post_type'] ) || 'mab_article' === get_query_var( 'post_type' ) ) ) { mh_mab_render_search(); exit; }
+	if ( is_post_type_archive( 'mab_article' ) && ! is_search() && isset( $_GET['mab_volume'] ) && ctype_digit( (string) $_GET['mab_volume'] ) ) { mh_mab_render_volume(); exit; }
 	if ( is_post_type_archive( 'mab_article' ) && ! is_search() ) { mh_mab_render_hub(); exit; }
 	if ( is_tax( 'mab_issue' ) )  { mh_mab_render_issue_toc(); exit; }
 	if ( is_tax( 'mab_topic' ) || is_tax( 'mab_author' ) || is_tax( 'mab_type' ) ) { mh_mab_render_term_grid(); exit; }
@@ -315,6 +316,41 @@ function mh_mab_render_term_grid() {
 			<div class="mab-pagination"><?php
 				echo paginate_links( array( 'total' => $q->max_num_pages, 'current' => $paged, 'prev_text' => '&larr;', 'next_text' => '&rarr;' ) );
 			?></div>
+			<a class="mab-backlink" href="<?php echo esc_url( get_post_type_archive_link( 'mab_article' ) ); ?>">&larr; Back to the full archive</a>
+		</div>
+	</div>
+	<?php
+	get_footer();
+}
+
+function mh_mab_render_volume() {
+	get_header();
+	$vol = (int) $_GET['mab_volume'];
+	$q = new WP_Query( array( 'post_type' => 'mab_article', 'posts_per_page' => 200, 'no_found_rows' => true,
+		'meta_query' => array( array( 'key' => 'mab_volume', 'value' => $vol, 'type' => 'NUMERIC' ) ) ) );
+	$posts = $q->posts;
+	usort( $posts, function ( $a, $b ) {
+		$ia = (int) get_post_meta( $a->ID, 'mab_issue_num', true ); $ib = (int) get_post_meta( $b->ID, 'mab_issue_num', true );
+		if ( $ia !== $ib ) return $ia - $ib;
+		return mh_mab_page_start( $a->ID ) <=> mh_mab_page_start( $b->ID );
+	} );
+	$years = array();
+	foreach ( $posts as $p ) { $y = (int) get_post_meta( $p->ID, 'mab_year', true ); if ( $y ) $years[ $y ] = 1; }
+	$yk = array_keys( $years ); sort( $yk );
+	$yr = $yk ? ( count( $yk ) > 1 ? $yk[0] . '&ndash;' . end( $yk ) : (string) $yk[0] ) : '';
+	?>
+	<div class="mab-wrap">
+		<div class="mab-hero">
+			<div class="k">Marathon &amp; Beyond Archive<?php echo $yr ? ' &middot; ' . $yr : ''; ?></div>
+			<h1>Volume <?php echo (int) $vol; ?></h1>
+			<p><?php echo count( $posts ); ?> articles across this volume, in issue order.</p>
+		</div>
+		<div class="mab-sec">
+			<?php if ( $posts ) : ?>
+			<div class="mab-grid"><?php foreach ( $posts as $p ) echo mh_mab_card( $p ); ?></div>
+			<?php else : ?>
+			<p class="mab-noresults">No articles found for Volume <?php echo (int) $vol; ?>. <a href="<?php echo esc_url( get_post_type_archive_link( 'mab_article' ) ); ?>">Browse the full archive</a>.</p>
+			<?php endif; ?>
 			<a class="mab-backlink" href="<?php echo esc_url( get_post_type_archive_link( 'mab_article' ) ); ?>">&larr; Back to the full archive</a>
 		</div>
 	</div>
